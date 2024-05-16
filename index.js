@@ -51,6 +51,24 @@ async function run() {
       res.send(result); 
     })
 
+    app.patch('/allbooks/:id',async (req,res) => {
+      const id = req.params.id;
+      const info = req.body;
+      const {bookname,image,authorname,category,rating} = info;
+      const filter = {_id : new ObjectId(id)};
+      const options = { upsert: true };
+      const update = {
+        $set: {
+          bookname,
+          image,
+          authorname,
+          category,
+          rating
+        }
+      }    
+      const result = await booksCollection.updateOne(filter,update,options);
+      res.send(result);
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
