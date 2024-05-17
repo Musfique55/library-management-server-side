@@ -31,6 +31,7 @@ async function run() {
     // await client.connect();
 
     const booksCollection = client.db("booksDB").collection("books");
+    const categoryCollection = client.db("BookCategoriesDB").collection("books");
 
     app.post('/allbooks', async(req,res) => {
         const books = req.body;
@@ -54,20 +55,27 @@ async function run() {
     app.patch('/allbooks/:id',async (req,res) => {
       const id = req.params.id;
       const info = req.body;
-      const {bookname,image,authorname,category,rating} = info;
       const filter = {_id : new ObjectId(id)};
+      console.log(info,filter);
       const options = { upsert: true };
       const update = {
         $set: {
-          bookname,
-          image,
-          authorname,
-          category,
-          rating
+          name : info.bookname,
+          image : info.image,
+          author : info.authorname,
+          category : info.category,
+          rating : info.rating
         }
       }    
       const result = await booksCollection.updateOne(filter,update,options);
       res.send(result);
+    })
+
+    // categories
+
+    app.get('/categories',async(req,res) => {
+      const result = await categoryCollection.find().toArray();
+      res.send(result); 
     })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
