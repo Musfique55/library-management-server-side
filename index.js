@@ -30,7 +30,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const booksCollection = client.db("booksDB").collection("books");
+    const booksCollection = client.db("booksDB").collection("allbooks");
     const categoryCollection = client.db("BookCategoriesDB").collection("books");
     const borrowedCollection = client.db("borrowedDB").collection("books");
 
@@ -90,7 +90,7 @@ async function run() {
 
     app.post('/borrowed-books', async (req,res) => {
       const info = req.body;
-      // console.log(req.body);
+      console.log(req.body);
       const query = {
         _id : info._id,
         email : info.email
@@ -100,6 +100,15 @@ async function run() {
       if(alreadyBorrowed){
         return res.status(400).send({message : 'You have already borrowed this book'});
       }
+
+      const filter = {
+        _id : new ObjectId(info._id)
+      }
+      const updateQuantity = {
+        $inc: { quantity: -1}
+      }
+      const update = await booksCollection.updateOne(filter,updateQuantity);
+      console.log(update);
       const result = await borrowedCollection.insertOne(info);
       res.send(result);
     })
