@@ -32,6 +32,7 @@ async function run() {
 
     const booksCollection = client.db("booksDB").collection("books");
     const categoryCollection = client.db("BookCategoriesDB").collection("books");
+    const borrowedCollection = client.db("borrowedDB").collection("books");
 
     app.post('/allbooks', async(req,res) => {
         const books = req.body;
@@ -82,6 +83,24 @@ async function run() {
       const category = req.params.category;
       const query = {category : category};
       const result = await booksCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    // borrow reqs
+
+    app.post('/borrowed-books', async (req,res) => {
+      const info = req.body;
+      // console.log(req.body);
+      const query = {
+        _id : info._id,
+        email : info.email
+      }
+      // console.log(query);
+      const alreadyBorrowed = await borrowedCollection.findOne(query);
+      if(alreadyBorrowed){
+        return res.status(400).send({message : 'You have already borrowed this book'});
+      }
+      const result = await borrowedCollection.insertOne(info);
       res.send(result);
     })
     // Send a ping to confirm a successful connection
