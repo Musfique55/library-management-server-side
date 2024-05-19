@@ -107,8 +107,7 @@ async function run() {
       const updateQuantity = {
         $inc: { quantity: -1}
       }
-      const update = await booksCollection.updateOne(filter,updateQuantity);
-      console.log(update);
+      await booksCollection.updateOne(filter,updateQuantity);
       const result = await borrowedCollection.insertOne(info);
       res.send(result);
     })
@@ -118,8 +117,22 @@ async function run() {
       if(req.query?.email){
         query = {email : req.query.email}
       }
-      const result = await borrowedCollection.find(query).toArray();
+      const result = await borrowedCollection.find().toArray();
       return  res.send(result);
+    })
+
+    app.delete('/borrowed-books/:id',async(req,res) => {
+      const id = req.params.id;
+      const query = { _id : id};
+      const filter = {
+        _id : new ObjectId(id)
+      }
+      const update = {
+        $inc : {quantity : 1}
+      }
+      booksCollection.updateOne(filter,update);
+      const result = await borrowedCollection.deleteOne(query);
+      res.send(result);
     })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
